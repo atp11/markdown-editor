@@ -61,7 +61,25 @@ function greet(name: string) {
 
 Usa **Insertar índice** en la barra de herramientas para generar un TOC a partir de los encabezados.
 
+## Cómo ejecutarlo
 
+Necesitas [Node.js](https://nodejs.org/) (versión 20 o superior).
+
+```bash
+git clone https://github.com/atp11/markdown-editor.git
+cd markdown-editor
+npm install
+npm run dev
+```
+
+Abre en el navegador la URL que muestre Vite (por defecto `http://localhost:5173/markdown-editor/`).
+
+Para generar la versión de producción:
+
+```bash
+npm run build
+npm run preview
+```
 
 ## Stack
 
