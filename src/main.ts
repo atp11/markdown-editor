@@ -241,7 +241,7 @@ document.querySelector('.topbar-actions')!.addEventListener('click', async (e) =
       break
     case 'export-pdf':
       exportPdf(source, previewRoot)
-      setStatus('Abriendo diálogo de impresión para PDF…', true)
+      setStatus('En el diálogo de impresión elige «Guardar como PDF»', true)
       break
   }
 })

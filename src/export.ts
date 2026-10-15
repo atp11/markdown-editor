@@ -137,33 +137,52 @@ export function downloadHtml(
 }
 
 /**
- * Export to PDF via the browser print dialog.
+ * Export to PDF via the browser print dialog (hidden iframe, no popup).
  * Mermaid diagrams are embedded as already-rendered SVGs.
+ * In the print dialog, choose "Save as PDF" / "Guardar como PDF".
  */
 export function exportPdf(source: string, previewRoot: HTMLElement): void {
   const title = extractTitle(source) || 'Documento'
   const html = buildStandaloneHtml(source, title, collectMermaidSvgs(previewRoot))
-  const win = window.open('', '_blank', 'noopener,noreferrer')
-  if (!win) {
-    window.alert('No se pudo abrir la ventana de impresión. Permite ventanas emergentes e inténtalo de nuevo.')
+
+  document.getElementById('pdf-print-frame')?.remove()
+
+  const iframe = document.createElement('iframe')
+  iframe.id = 'pdf-print-frame'
+  iframe.title = 'Impresión PDF'
+  iframe.setAttribute('aria-hidden', 'true')
+  Object.assign(iframe.style, {
+    position: 'fixed',
+    right: '0',
+    bottom: '0',
+    width: '0',
+    height: '0',
+    border: '0',
+    opacity: '0',
+    pointerEvents: 'none',
+  })
+  document.body.appendChild(iframe)
+
+  const frameWindow = iframe.contentWindow
+  const frameDoc = iframe.contentDocument
+  if (!frameWindow || !frameDoc) {
+    iframe.remove()
+    window.alert('No se pudo preparar la impresión. Prueba de nuevo o exporta a HTML.')
     return
   }
-  win.document.open()
-  win.document.write(html)
-  win.document.close()
-  win.document.title = title
+
+  frameDoc.open()
+  frameDoc.write(html)
+  frameDoc.close()
 
   const triggerPrint = () => {
-    win.focus()
-    win.print()
+    frameWindow.focus()
+    frameWindow.print()
+    window.setTimeout(() => iframe.remove(), 1000)
   }
 
-  // Wait for fonts/images briefly, then print
-  if (win.document.fonts?.ready) {
-    win.document.fonts.ready.then(() => setTimeout(triggerPrint, 150))
-  } else {
-    setTimeout(triggerPrint, 300)
-  }
+  // Print ASAP to keep the user-gesture context; brief delay for layout/fonts.
+  window.setTimeout(triggerPrint, 250)
 }
 
 export async function copyToClipboard(text: string): Promise<boolean> {
